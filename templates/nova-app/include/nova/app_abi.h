@@ -13,6 +13,7 @@ typedef struct {
     uint32_t struct_size;
     uint32_t (*uptime_ms)(void);
     int (*display_text)(uint16_t x,uint16_t y,const char *text,uint16_t rgb565);
+    uint8_t (*buttons_take_events)(void);
     int (*storage_mount)(void);
     int (*storage_unmount)(void);
     int (*storage_read)(const char *path,void *buffer,size_t capacity,size_t *read_bytes);
