@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "Hello NOVA",
+  "kind": "firmware-template",
+  "targets": ["rp2040", "rp2350-arm-s"],
+  "note": "This Alpha 0 template builds a standalone Pico SDK firmware image. It is not yet a NOVA .nova application package."
+}
