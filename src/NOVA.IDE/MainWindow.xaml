@@ -2,27 +2,66 @@
   <Grid Margin="18">
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="190"/></Grid.RowDefinitions>
     <DockPanel Margin="0,0,0,16">
-      <StackPanel DockPanel.Dock="Left"><TextBlock Text="NOVA OS IDE" FontSize="25" FontWeight="Bold"/><TextBlock Text="Embedded application studio · Alpha 0" Foreground="#9EADBF"/></StackPanel>
+      <StackPanel DockPanel.Dock="Left"><TextBlock Text="NOVA OS IDE" FontSize="25" FontWeight="Bold"/><TextBlock Text="Windows application studio · Alpha 1"/></StackPanel>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
         <ComboBox x:Name="TargetBox" Width="210" SelectedIndex="0" Margin="8"><ComboBoxItem Content="Raspberry Pi Pico · RP2040"/><ComboBoxItem Content="Raspberry Pi Pico 2 · RP2350 M33"/></ComboBox>
-        <Button Content="Open Project" Padding="16,9" Margin="5" Click="OpenProject_Click"/>
-        <Button Content="Build" Padding="22,9" Margin="5" Background="#39B6A5" Foreground="#08151D" FontWeight="Bold" Click="Build_Click"/>
+        <Button Content="Open Project" Padding="12,9" Margin="4" Click="OpenProject_Click"/>
+        <Button Content="Build" Padding="16,9" Margin="4" Background="#39B6A5" Foreground="#08151D" FontWeight="Bold" Click="Build_Click"/>
+        <Button Content="Package .nova" Padding="12,9" Margin="4" Click="Package_Click"/>
+        <Button Content="Inspect" Padding="12,9" Margin="4" Click="InspectPackage_Click"/>
       </StackPanel>
     </DockPanel>
     <Grid Grid.Row="1">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="245"/><ColumnDefinition Width="*"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="270"/><ColumnDefinition Width="*"/><ColumnDefinition Width="240"/></Grid.ColumnDefinitions>
       <Border Grid.Column="0" Background="#172235" CornerRadius="10" Padding="14" Margin="0,0,10,0">
-        <StackPanel><TextBlock Text="WORKSPACE" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/><TextBlock x:Name="ProjectPathText" Text="No project opened" TextWrapping="Wrap"/><Separator Margin="0,15"/><TextBlock Text="PROJECT TOOLS" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,10"/><TextBlock Text="• Project explorer"/><TextBlock Text="• Board configuration"/><TextBlock Text="• Build diagnostics"/><TextBlock Text="• Package inspector (planned)"/><TextBlock Text="• USB deploy (planned)"/></StackPanel>
+        <StackPanel>
+          <TextBlock Text="WORKSPACE" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/>
+          <TextBlock x:Name="ProjectPathText" Text="No project opened" TextWrapping="Wrap"/>
+          <Separator Margin="0,15"/>
+          <TextBlock Text="APPLICATION PACKAGE" FontWeight="Bold" Foreground="#39B6A5" Margin="0,0,0,10"/>
+          <TextBlock Text="Application name" Foreground="#9EADBF"/>
+          <TextBox x:Name="AppNameBox" Text="My NOVA App" Margin="0,4,0,8" Padding="6"/>
+          <TextBlock Text="Version" Foreground="#9EADBF"/>
+          <TextBox x:Name="AppVersionBox" Text="1.0.0" Margin="0,4,0,8" Padding="6"/>
+          <TextBlock Text="BIN load address (hex)" Foreground="#9EADBF"/>
+          <TextBox x:Name="LoadAddressBox" Text="20020000" Margin="0,4,0,8" Padding="6"/>
+          <TextBlock Text="ELF entry point is read from its header. BIN requires an explicit address." Foreground="#9EADBF" TextWrapping="Wrap" FontSize="11"/>
+          <Separator Margin="0,12"/>
+          <TextBlock Text="LIMITS" FontWeight="Bold" Foreground="#9EADBF"/>
+          <TextBlock Text="2 MiB maximum total package" Margin="0,6,0,0"/>
+          <TextBlock Text="ARM ELF32 or raw BIN input"/>
+          <TextBlock Text="UF2 reserved for firmware flashing"/>
+        </StackPanel>
       </Border>
       <Border Grid.Column="1" Background="#0B1220" CornerRadius="10" Padding="18" Margin="0,0,10,0">
-        <StackPanel><TextBlock Text="Welcome to NOVA" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="Build applications for RP2040 and RP2350 with the NOVA SDK." Foreground="#9EADBF" Margin="0,8,0,22"/><TextBlock Text="QUICK START" Foreground="#39B6A5" FontWeight="Bold"/><TextBlock Text="1. Open a NOVA project folder containing CMakeLists.txt." Margin="0,10,0,0"/><TextBlock Text="2. Select the target board." Margin="0,6,0,0"/><TextBlock Text="3. Configure PICO_SDK_PATH and local build tools." Margin="0,6,0,0"/><TextBlock Text="4. Build and inspect compiler output below." Margin="0,6,0,0"/><TextBlock x:Name="StatusText" Text="Ready · Toolchain not yet checked" Foreground="#F0C674" Margin="0,28,0,0"/></StackPanel>
+        <StackPanel>
+          <TextBlock Text="NOVA APPLICATION STUDIO" FontSize="24" FontWeight="SemiBold"/>
+          <TextBlock Text="Build and package applications for Raspberry Pi Pico and Pico 2." Foreground="#9EADBF" Margin="0,8,0,22"/>
+          <TextBlock Text="WORKFLOW" Foreground="#39B6A5" FontWeight="Bold"/>
+          <TextBlock Text="1. Open a NOVA project containing CMakeLists.txt." Margin="0,10,0,0"/>
+          <TextBlock Text="2. Select RP2040 or RP2350 Cortex-M33." Margin="0,6,0,0"/>
+          <TextBlock Text="3. Build the ELF/BIN with the NOVA application SDK." Margin="0,6,0,0"/>
+          <TextBlock Text="4. Package the ELF/BIN into a .nova container." Margin="0,6,0,0"/>
+          <TextBlock Text="5. Copy .nova to the SD card after the runtime installer is available." Margin="0,6,0,0"/>
+          <TextBlock x:Name="StatusText" Text="Ready · Toolchain not yet checked" Foreground="#F0C674" Margin="0,28,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
       </Border>
       <Border Grid.Column="2" Background="#172235" CornerRadius="10" Padding="14">
-        <StackPanel><TextBlock Text="TOOLCHAIN STATUS" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/><TextBlock x:Name="CmakeStatus" Text="CMake: checking..."/><TextBlock x:Name="NinjaStatus" Text="Ninja: checking..." Margin="0,8,0,0"/><TextBlock x:Name="ArmStatus" Text="ARM GCC: checking..." Margin="0,8,0,0"/><TextBlock x:Name="SdkStatus" Text="Pico SDK: not configured" TextWrapping="Wrap" Margin="0,8,0,0"/><Separator Margin="0,16"/><TextBlock Text="SUPPORTED TARGETS" Foreground="#9EADBF" FontWeight="Bold"/><TextBlock Text="RP2040 · Cortex-M0+"/><TextBlock Text="RP2350 · Cortex-M33" Margin="0,6,0,0"/></StackPanel>
+        <StackPanel>
+          <TextBlock Text="TOOLCHAIN STATUS" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/>
+          <TextBlock x:Name="CmakeStatus" Text="CMake: checking..."/>
+          <TextBlock x:Name="NinjaStatus" Text="Ninja: checking..." Margin="0,8,0,0"/>
+          <TextBlock x:Name="ArmStatus" Text="ARM GCC: checking..." Margin="0,8,0,0"/>
+          <TextBlock x:Name="SdkStatus" Text="Pico SDK: not configured" TextWrapping="Wrap" Margin="0,8,0,0"/>
+          <Separator Margin="0,16"/>
+          <TextBlock Text="SUPPORTED TARGETS" Foreground="#9EADBF" FontWeight="Bold"/>
+          <TextBlock Text="RP2040 · Cortex-M0+"/>
+          <TextBlock Text="RP2350 · Cortex-M33" Margin="0,6,0,0"/>
+        </StackPanel>
       </Border>
     </Grid>
     <Border Grid.Row="2" Background="#080E18" CornerRadius="10" Padding="12" Margin="0,12,0,0">
-      <DockPanel><TextBlock DockPanel.Dock="Top" Text="BUILD OUTPUT" Foreground="#39B6A5" FontWeight="Bold" Margin="0,0,0,8"/><TextBox x:Name="OutputBox" Background="#080E18" Foreground="#D7E0EB" BorderThickness="0" FontFamily="Consolas" FontSize="12" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/></DockPanel>
+      <DockPanel><TextBlock DockPanel.Dock="Top" Text="BUILD / PACKAGE OUTPUT" Foreground="#39B6A5" FontWeight="Bold" Margin="0,0,0,8"/><TextBox x:Name="OutputBox" Background="#080E18" Foreground="#D7E0EB" BorderThickness="0" FontFamily="Consolas" FontSize="12" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/></DockPanel>
     </Border>
   </Grid>
 </Window>
