@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using Microsoft.Win32;
+using NOVA.IDE.Packaging;
 
 namespace NOVA.IDE;
 
@@ -76,9 +78,63 @@ public partial class MainWindow : Window
         StatusText.Text = $"Configuring {board}...";
         var configure = await RunProcess(cmake, $"-S . -B \"{buildDirectory}\" -G Ninja -DPICO_BOARD={board} -DPICO_PLATFORM={platform} -DPICO_SDK_PATH=\"{sdk}\" -DCMAKE_BUILD_TYPE=Release", _projectDirectory);
         if (configure != 0) { StatusText.Text = "CMake configuration failed."; return; }
-        StatusText.Text = "Compiling firmware...";
+        StatusText.Text = "Compiling...";
         var build = await RunProcess(cmake, $"--build \"{buildDirectory}\" --parallel", _projectDirectory);
         StatusText.Text = build == 0 ? $"Build succeeded: {buildDirectory}" : "Build failed. See output.";
+    }
+
+    private void Package_Click(object sender, RoutedEventArgs e)
+    {
+        var open = new OpenFileDialog
+        {
+            Title = "Select NOVA application ELF or BIN",
+            Filter = "NOVA application input (*.elf;*.bin)|*.elf;*.bin|ARM ELF32 (*.elf)|*.elf|Raw binary (*.bin)|*.bin"
+        };
+        if (open.ShowDialog() != true) return;
+        var target = TargetBox.SelectedIndex == 1 ? NovaTarget.Rp2350ArmM33 : NovaTarget.Rp2040;
+        uint loadAddress = 0;
+        if (Path.GetExtension(open.FileName).Equals(".bin", StringComparison.OrdinalIgnoreCase))
+        {
+            var text = LoadAddressBox.Text.Trim();
+            if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) text = text[2..];
+            if (!uint.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out loadAddress) || loadAddress == 0)
+            {
+                MessageBox.Show("Enter a valid non-zero hexadecimal BIN load address.", "Invalid load address", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+        }
+        var save = new SaveFileDialog { Title = "Save NOVA application package", Filter = "NOVA application (*.nova)|*.nova", FileName = Path.GetFileNameWithoutExtension(open.FileName) + ".nova" };
+        if (save.ShowDialog() != true) return;
+        try
+        {
+            var name = string.IsNullOrWhiteSpace(AppNameBox.Text) ? Path.GetFileNameWithoutExtension(open.FileName) : AppNameBox.Text.Trim();
+            var version = string.IsNullOrWhiteSpace(AppVersionBox.Text) ? "1.0.0" : AppVersionBox.Text.Trim();
+            var info = NovaPackage.Create(open.FileName, save.FileName, name, version, target, 1u, loadAddress);
+            OutputBox.AppendText($"Created {save.FileName}\nTarget: {info.Target}\nKind: {info.ImageKind}\nPayload: {info.PayloadLength} bytes\nSHA-256: {info.Sha256}\n");
+            StatusText.Text = "NOVA package created. Runtime compatibility is not yet certified.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Package creation failed.";
+            MessageBox.Show(ex.Message, "NOVA package error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void InspectPackage_Click(object sender, RoutedEventArgs e)
+    {
+        var open = new OpenFileDialog { Title = "Inspect NOVA package", Filter = "NOVA application (*.nova)|*.nova" };
+        if (open.ShowDialog() != true) return;
+        try
+        {
+            var info = NovaPackage.Inspect(open.FileName);
+            OutputBox.AppendText($"Verified {open.FileName}\nName: {info.Name}\nVersion: {info.Version}\nTarget: {info.Target}\nABI: {info.AbiVersion}\nLoad: 0x{info.LoadAddress:X8}\nPayload: {info.PayloadLength} bytes\nSHA-256: {info.Sha256}\n");
+            StatusText.Text = "Package structure and payload hash verified.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Package verification failed.";
+            MessageBox.Show(ex.Message, "NOVA package error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private async Task<int> RunProcess(string executable, string arguments, string workingDirectory)
