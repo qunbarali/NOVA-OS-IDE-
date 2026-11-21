@@ -3,7 +3,7 @@
 Windows desktop development environment for NOVA-OS applications targeting Raspberry Pi Pico (RP2040) and Pico 2 (RP2350 Cortex-M33).
 
 ## Status
-IDE Alpha 0 scaffold. This repository starts the native Windows WPF application. The current build supports project-folder selection, toolchain discovery, CMake configure/build invocation and build output display. A first .nova package writer/verifier and WPF package/inspect UI now accept ARM ELF32 and raw BIN inputs, enforce the 2 MiB total package limit and SHA-256 integrity, and reject UF2 as an application. The application ABI v1 draft and starter header are included. Runtime ELF loading, relocation validation, memory isolation, USB install protocol and debugger remain incomplete.
+IDE Alpha 0 scaffold. This repository starts the native Windows WPF application. The current build supports project-folder selection, toolchain discovery, CMake configure/build invocation and build output display. A first .nova package writer/verifier and WPF package/inspect UI now accept ARM ELF32 and raw BIN inputs, enforce the 2 MiB total package limit and SHA-256 integrity, and reject UF2 as an application. The application ABI v1 draft and starter header are included. The IDE now validates the ARM ELF executable type and `nova_app_main` Thumb entry symbol, and can copy verified packages to a FAT32 SD card under `NOVA/APPS`. Runtime ELF loading, relocation validation, memory isolation, USB install protocol and debugger remain incomplete.
 
 ## Requirements
 - Windows 10/11 x64
