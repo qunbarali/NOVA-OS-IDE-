@@ -23,6 +23,8 @@ public static class NovaPackage
         ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
+        if (!Enum.IsDefined(target)) throw new ArgumentOutOfRangeException(nameof(target));
+        if (abiVersion == 0) throw new ArgumentOutOfRangeException(nameof(abiVersion));
         if (name.Length > 47 || version.Length > 15) throw new ArgumentException("Name or version is too long.");
         var extension = Path.GetExtension(inputPath).ToLowerInvariant();
         if (extension == ".uf2") throw new InvalidDataException("UF2 is firmware flashing/recovery, not an application payload.");
@@ -42,6 +44,7 @@ public static class NovaPackage
                 payload[5] != 1 || BinaryPrimitives.ReadUInt16LittleEndian(payload.AsSpan(18, 2)) != 40)
                 throw new InvalidDataException("ELF must be little-endian ARM ELF32.");
             loadAddress = BinaryPrimitives.ReadUInt32LittleEndian(payload.AsSpan(24, 4));
+            if (loadAddress == 0) throw new InvalidDataException("ELF entry point must be non-zero.");
         }
         else if (loadAddress == 0) throw new InvalidDataException("Raw BIN requires an explicit non-zero load address.");
 
@@ -75,7 +78,9 @@ public static class NovaPackage
         if (reader.ReadUInt16() != 1) throw new InvalidDataException("Unsupported package version.");
         var target = (NovaTarget)reader.ReadByte();
         var kind = (NovaImageKind)reader.ReadByte();
+        if (!Enum.IsDefined(target) || !Enum.IsDefined(kind)) throw new InvalidDataException("Unknown target or image kind.");
         var abi = reader.ReadUInt32();
+        if (abi == 0) throw new InvalidDataException("ABI version zero is invalid.");
         var length = reader.ReadUInt32();
         var address = reader.ReadUInt32();
         var name = ReadFixed(reader, 48);
