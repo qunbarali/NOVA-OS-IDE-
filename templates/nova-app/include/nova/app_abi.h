@@ -7,6 +7,7 @@
 #define NOVA_APP_ENTRY_SYMBOL "nova_app_main"
 #define NOVA_APP_PACKAGE_MAX_BYTES (2u * 1024u * 1024u)
 typedef enum { NOVA_APP_STOPPED=0, NOVA_APP_VALIDATING, NOVA_APP_READY, NOVA_APP_RUNNING, NOVA_APP_STOPPING, NOVA_APP_FAILED } nova_app_state_t;
+typedef enum { NOVA_APP_BUTTON_UP=1u, NOVA_APP_BUTTON_DOWN=2u, NOVA_APP_BUTTON_SELECT=4u, NOVA_APP_BUTTON_BACK=8u } nova_app_button_event_t;
 typedef enum { NOVA_APP_EXIT_NORMAL=0, NOVA_APP_EXIT_REQUESTED=1, NOVA_APP_EXIT_ERROR=-1 } nova_app_exit_t;
 typedef struct {
     uint32_t abi_version;
