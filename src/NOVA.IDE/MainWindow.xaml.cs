@@ -137,6 +137,40 @@ public partial class MainWindow : Window
         }
     }
 
+
+    private void InstallPackage_Click(object sender, RoutedEventArgs e)
+    {
+        var open = new OpenFileDialog { Title = "Select NOVA package to install", Filter = "NOVA application (*.nova)|*.nova" };
+        if (open.ShowDialog() != true) return;
+        var folder = new OpenFolderDialog { Title = "Select the root of the NOVA SD card" };
+        if (folder.ShowDialog() != true) return;
+        try
+        {
+            var root = Path.GetPathRoot(folder.FolderName);
+            if (string.IsNullOrWhiteSpace(root)) throw new InvalidOperationException("Cannot identify the selected drive.");
+            var drive = new DriveInfo(root);
+            if (!drive.IsReady || drive.DriveType != DriveType.Removable)
+                throw new InvalidOperationException("Select a mounted removable SD-card drive.");
+            if (!drive.DriveFormat.Equals("FAT32", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"NOVA currently requires FAT32; selected drive is {drive.DriveFormat}.");
+            var info = NovaPackage.Inspect(open.FileName);
+            if (TargetBox.SelectedIndex == 0 && info.Target != NovaTarget.Rp2040 ||
+                TargetBox.SelectedIndex == 1 && info.Target != NovaTarget.Rp2350ArmM33)
+                throw new InvalidOperationException("Package target does not match the selected IDE target.");
+            var apps = Path.Combine(folder.FolderName, "NOVA", "APPS");
+            Directory.CreateDirectory(apps);
+            var destination = Path.Combine(apps, Path.GetFileName(open.FileName));
+            File.Copy(open.FileName, destination, overwrite: true);
+            OutputBox.AppendText($"Installed package file: {destination}\nPackage: {info.Name} {info.Version}\n");
+            StatusText.Text = "Package copied to SD. Runtime execution is not yet enabled in this firmware.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "SD installation failed.";
+            MessageBox.Show(ex.Message, "NOVA SD installer", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private async Task<int> RunProcess(string executable, string arguments, string workingDirectory)
     {
         var start = new ProcessStartInfo(executable, arguments) { WorkingDirectory = workingDirectory, UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true };
