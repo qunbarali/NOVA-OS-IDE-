@@ -1,0 +1,28 @@
+<Window x:Class="NOVA.IDE.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NOVA OS IDE" Height="780" Width="1240" MinHeight="620" MinWidth="960" Background="#101827" Foreground="#F3F6FA">
+  <Grid Margin="18">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="190"/></Grid.RowDefinitions>
+    <DockPanel Margin="0,0,0,16">
+      <StackPanel DockPanel.Dock="Left"><TextBlock Text="NOVA OS IDE" FontSize="25" FontWeight="Bold"/><TextBlock Text="Embedded application studio · Alpha 0" Foreground="#9EADBF"/></StackPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+        <ComboBox x:Name="TargetBox" Width="210" SelectedIndex="0" Margin="8"><ComboBoxItem Content="Raspberry Pi Pico · RP2040"/><ComboBoxItem Content="Raspberry Pi Pico 2 · RP2350 M33"/></ComboBox>
+        <Button Content="Open Project" Padding="16,9" Margin="5" Click="OpenProject_Click"/>
+        <Button Content="Build" Padding="22,9" Margin="5" Background="#39B6A5" Foreground="#08151D" FontWeight="Bold" Click="Build_Click"/>
+      </StackPanel>
+    </DockPanel>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="245"/><ColumnDefinition Width="*"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Background="#172235" CornerRadius="10" Padding="14" Margin="0,0,10,0">
+        <StackPanel><TextBlock Text="WORKSPACE" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/><TextBlock x:Name="ProjectPathText" Text="No project opened" TextWrapping="Wrap"/><Separator Margin="0,15"/><TextBlock Text="PROJECT TOOLS" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,10"/><TextBlock Text="• Project explorer"/><TextBlock Text="• Board configuration"/><TextBlock Text="• Build diagnostics"/><TextBlock Text="• Package inspector (planned)"/><TextBlock Text="• USB deploy (planned)"/></StackPanel>
+      </Border>
+      <Border Grid.Column="1" Background="#0B1220" CornerRadius="10" Padding="18" Margin="0,0,10,0">
+        <StackPanel><TextBlock Text="Welcome to NOVA" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="Build applications for RP2040 and RP2350 with the NOVA SDK." Foreground="#9EADBF" Margin="0,8,0,22"/><TextBlock Text="QUICK START" Foreground="#39B6A5" FontWeight="Bold"/><TextBlock Text="1. Open a NOVA project folder containing CMakeLists.txt." Margin="0,10,0,0"/><TextBlock Text="2. Select the target board." Margin="0,6,0,0"/><TextBlock Text="3. Configure PICO_SDK_PATH and local build tools." Margin="0,6,0,0"/><TextBlock Text="4. Build and inspect compiler output below." Margin="0,6,0,0"/><TextBlock x:Name="StatusText" Text="Ready · Toolchain not yet checked" Foreground="#F0C674" Margin="0,28,0,0"/></StackPanel>
+      </Border>
+      <Border Grid.Column="2" Background="#172235" CornerRadius="10" Padding="14">
+        <StackPanel><TextBlock Text="TOOLCHAIN STATUS" FontWeight="Bold" Foreground="#9EADBF" Margin="0,0,0,12"/><TextBlock x:Name="CmakeStatus" Text="CMake: checking..."/><TextBlock x:Name="NinjaStatus" Text="Ninja: checking..." Margin="0,8,0,0"/><TextBlock x:Name="ArmStatus" Text="ARM GCC: checking..." Margin="0,8,0,0"/><TextBlock x:Name="SdkStatus" Text="Pico SDK: not configured" TextWrapping="Wrap" Margin="0,8,0,0"/><Separator Margin="0,16"/><TextBlock Text="SUPPORTED TARGETS" Foreground="#9EADBF" FontWeight="Bold"/><TextBlock Text="RP2040 · Cortex-M0+"/><TextBlock Text="RP2350 · Cortex-M33" Margin="0,6,0,0"/></StackPanel>
+      </Border>
+    </Grid>
+    <Border Grid.Row="2" Background="#080E18" CornerRadius="10" Padding="12" Margin="0,12,0,0">
+      <DockPanel><TextBlock DockPanel.Dock="Top" Text="BUILD OUTPUT" Foreground="#39B6A5" FontWeight="Bold" Margin="0,0,0,8"/><TextBox x:Name="OutputBox" Background="#080E18" Foreground="#D7E0EB" BorderThickness="0" FontFamily="Consolas" FontSize="12" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/></DockPanel>
+    </Border>
+  </Grid>
+</Window>
