@@ -13,7 +13,8 @@
 - ELF inspection and memory map validation
 - Deterministic .nova package builder and verifier
 - WPF package creation and inspection UI
-- ABI v1 draft header and starter template
+- ABI v1 draft header and freestanding ARM ELF app template with linker script
+- IDE app build mode that requires explicit reserved RAM origin/length from firmware map
 - Strict 2 MiB package-size limit
 
 ## Alpha 2 — deployment
