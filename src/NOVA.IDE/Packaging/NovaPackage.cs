@@ -41,10 +41,10 @@ public static class NovaPackage
         {
             if (payload.Length < 52 || payload[0] != 0x7F || payload[1] != (byte)'E' ||
                 payload[2] != (byte)'L' || payload[3] != (byte)'F' || payload[4] != 1 ||
-                payload[5] != 1 || BinaryPrimitives.ReadUInt16LittleEndian(payload.AsSpan(18, 2)) != 40)
+                payload[5] != 1 || BinaryPrimitives.ReadUInt16LittleEndian(payload.AsSpan(16, 2)) != 2 || BinaryPrimitives.ReadUInt16LittleEndian(payload.AsSpan(18, 2)) != 40)
                 throw new InvalidDataException("ELF must be little-endian ARM ELF32.");
             loadAddress = BinaryPrimitives.ReadUInt32LittleEndian(payload.AsSpan(24, 4));
-            if (loadAddress == 0) throw new InvalidDataException("ELF entry point must be non-zero.");
+            if (loadAddress == 0 || (loadAddress & 1u) == 0u) throw new InvalidDataException("ELF entry point must be a non-zero Thumb address.");
         }
         else if (loadAddress == 0) throw new InvalidDataException("Raw BIN requires an explicit non-zero load address.");
 
