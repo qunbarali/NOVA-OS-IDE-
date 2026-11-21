@@ -1,0 +1,40 @@
+ENTRY(nova_app_main)
+OUTPUT_FORMAT("elf32-littlearm")
+OUTPUT_ARCH(arm)
+MEMORY
+{
+    APP_RAM (rwx) : ORIGIN = @NOVA_APP_RAM_ORIGIN@, LENGTH = @NOVA_APP_RAM_LENGTH@
+}
+SECTIONS
+{
+    .text :
+    {
+        . = ALIGN(4);
+        KEEP(*(.text.nova_app_main))
+        *(.text*)
+        *(.rodata*)
+    } > APP_RAM
+    .data :
+    {
+        . = ALIGN(4);
+        *(.data*)
+    } > APP_RAM
+    .bss (NOLOAD) :
+    {
+        . = ALIGN(4);
+        __nova_app_bss_start = .;
+        *(.bss*)
+        *(COMMON)
+        __nova_app_bss_end = .;
+    } > APP_RAM
+    . = ALIGN(8);
+    __nova_app_image_end = .;
+    /DISCARD/ :
+    {
+        *(.comment*)
+        *(.note*)
+        *(.eh_frame*)
+        *(.ARM.exidx*)
+        *(.ARM.extab*)
+    }
+}
