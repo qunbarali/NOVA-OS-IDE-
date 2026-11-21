@@ -26,7 +26,14 @@
           <TextBox x:Name="AppVersionBox" Text="1.0.0" Margin="0,4,0,8" Padding="6"/>
           <TextBlock Text="BIN load address (hex)" Foreground="#9EADBF"/>
           <TextBox x:Name="LoadAddressBox" Text="20020000" Margin="0,4,0,8" Padding="6"/>
-          <TextBlock Text="ELF entry point is read from its header. BIN requires an explicit address." Foreground="#9EADBF" TextWrapping="Wrap" FontSize="11"/>
+          <TextBlock Text="ELF must retain nova_app_main as ENTRY and keep its symbol table. BIN requires an explicit non-zero load address." Foreground="#9EADBF" TextWrapping="Wrap" FontSize="11"/>
+          <Separator Margin="0,12"/>
+          <TextBlock Text="Reserved app RAM (from firmware map)" Foreground="#39B6A5" FontWeight="Bold"/>
+          <TextBlock Text="Origin (hex)" Foreground="#9EADBF" Margin="0,6,0,0"/>
+          <TextBox x:Name="AppRamOriginBox" Text="" Margin="0,4,0,8" Padding="6"/>
+          <TextBlock Text="Length (hex)" Foreground="#9EADBF"/>
+          <TextBox x:Name="AppRamLengthBox" Text="" Margin="0,4,0,8" Padding="6"/>
+          <TextBlock Text="Required only for the freestanding NOVA app template. Never guess this memory region." Foreground="#F0C674" TextWrapping="Wrap" FontSize="11"/>
           <Separator Margin="0,12"/>
           <TextBlock Text="LIMITS" FontWeight="Bold" Foreground="#9EADBF"/>
           <TextBlock Text="2 MiB maximum total package" Margin="0,6,0,0"/>
