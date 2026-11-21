@@ -128,8 +128,9 @@ public static class NovaPackage
                 var nameEnd = Array.IndexOf(elf, (byte)0, nameStart, checked((int)(stringsSize - nameOffset)));
                 if (nameEnd < 0 || Encoding.ASCII.GetString(elf, nameStart, nameEnd - nameStart) != "nova_app_main") continue;
                 var value = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(symbol + 4, 4));
+                var symbolInfo = elf[symbol + 12];
                 var sectionIndex = BinaryPrimitives.ReadUInt16LittleEndian(elf.AsSpan(symbol + 14, 2));
-                return sectionIndex != 0 && (value & ~1u) == (entryPoint & ~1u);
+                return (symbolInfo & 0x0F) == 2 && sectionIndex != 0 && (value & ~1u) == (entryPoint & ~1u);
             }
         }
         return false;
