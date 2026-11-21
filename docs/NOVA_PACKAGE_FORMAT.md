@@ -25,4 +25,4 @@ Maximum total package size is 2 MiB. The payload limit is therefore 2 MiB minus 
 - File extension is only an import hint; the actual ELF format header is checked.
 
 ## Runtime safety
-The package hash detects corruption; it is not a digital signature and does not authenticate publishers. The current NOVA kernel does not yet implement the matching application loader, relocation policy, memory isolation, ABI, or lifecycle contract. Do not execute packages until the firmware runtime implements and validates those requirements.
+The IDE verifies the ELF class, byte order, executable type, ARM machine ID, Thumb entry point and `nova_app_main` symbol. This does not yet validate every PT_LOAD range or relocation against the final firmware memory map. The package hash detects corruption; it is not a digital signature and does not authenticate publishers. The current NOVA kernel does not yet implement the matching application loader, relocation policy, memory isolation, ABI, or lifecycle contract. Do not execute packages until the firmware runtime implements and validates those requirements.
