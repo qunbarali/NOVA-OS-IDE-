@@ -9,6 +9,7 @@
         <Button Content="Build" Padding="16,9" Margin="4" Background="#39B6A5" Foreground="#08151D" FontWeight="Bold" Click="Build_Click"/>
         <Button Content="Package .nova" Padding="12,9" Margin="4" Click="Package_Click"/>
         <Button Content="Inspect" Padding="12,9" Margin="4" Click="InspectPackage_Click"/>
+        <Button Content="Install to SD" Padding="12,9" Margin="4" Click="InstallPackage_Click"/>
       </StackPanel>
     </DockPanel>
     <Grid Grid.Row="1">
@@ -42,7 +43,7 @@
           <TextBlock Text="2. Select RP2040 or RP2350 Cortex-M33." Margin="0,6,0,0"/>
           <TextBlock Text="3. Build the ELF/BIN with the NOVA application SDK." Margin="0,6,0,0"/>
           <TextBlock Text="4. Package the ELF/BIN into a .nova container." Margin="0,6,0,0"/>
-          <TextBlock Text="5. Copy .nova to the SD card after the runtime installer is available." Margin="0,6,0,0"/>
+          <TextBlock Text="5. Use Install to SD while the NOVA SD card is mounted as a Windows removable drive." Margin="0,6,0,0"/>
           <TextBlock x:Name="StatusText" Text="Ready · Toolchain not yet checked" Foreground="#F0C674" Margin="0,28,0,0" TextWrapping="Wrap"/>
         </StackPanel>
       </Border>
