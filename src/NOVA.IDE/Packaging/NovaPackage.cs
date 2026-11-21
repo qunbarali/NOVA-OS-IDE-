@@ -45,6 +45,7 @@ public static class NovaPackage
                 throw new InvalidDataException("ELF must be little-endian ARM ELF32.");
             loadAddress = BinaryPrimitives.ReadUInt32LittleEndian(payload.AsSpan(24, 4));
             if (loadAddress == 0 || (loadAddress & 1u) == 0u) throw new InvalidDataException("ELF entry point must be a non-zero Thumb address.");
+            if (!HasNovaEntryPoint(payload, loadAddress)) throw new InvalidDataException("ELF must export nova_app_main as its entry point. Link with ENTRY(nova_app_main) and keep the symbol table.");
         }
         else if (loadAddress == 0) throw new InvalidDataException("Raw BIN requires an explicit non-zero load address.");
 
@@ -92,6 +93,46 @@ public static class NovaPackage
         if (!CryptographicOperations.FixedTimeEquals(expectedHash, actualHash))
             throw new InvalidDataException("SHA-256 validation failed.");
         return new NovaPackageInfo(name, version, target, kind, abi, address, length, Convert.ToHexString(actualHash));
+    }
+
+    private static bool HasNovaEntryPoint(byte[] elf, uint entryPoint)
+    {
+        if (elf.Length < 52) return false;
+        var sectionOffset = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(32, 4));
+        var sectionEntrySize = BinaryPrimitives.ReadUInt16LittleEndian(elf.AsSpan(46, 2));
+        var sectionCount = BinaryPrimitives.ReadUInt16LittleEndian(elf.AsSpan(48, 2));
+        if (sectionEntrySize < 40 || sectionCount == 0 ||
+            (ulong)sectionOffset + (ulong)sectionEntrySize * sectionCount > (ulong)elf.Length) return false;
+
+        for (var i = 0; i < sectionCount; i++)
+        {
+            var section = checked((int)sectionOffset + i * sectionEntrySize);
+            var type = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(section + 4, 4));
+            if (type != 2 && type != 11) continue; // SHT_SYMTAB / SHT_DYNSYM
+            var symbolsOffset = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(section + 16, 4));
+            var symbolsSize = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(section + 20, 4));
+            var stringIndex = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(section + 24, 4));
+            var symbolEntrySize = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(section + 36, 4));
+            if (stringIndex >= sectionCount || symbolEntrySize < 16 ||
+                (ulong)symbolsOffset + symbolsSize > (ulong)elf.Length) continue;
+            var stringsSection = checked((int)sectionOffset + (int)stringIndex * sectionEntrySize);
+            var stringsOffset = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(stringsSection + 16, 4));
+            var stringsSize = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(stringsSection + 20, 4));
+            if ((ulong)stringsOffset + stringsSize > (ulong)elf.Length) continue;
+            for (uint offset = 0; offset + 16u <= symbolsSize; offset += symbolEntrySize)
+            {
+                var symbol = checked((int)(symbolsOffset + offset));
+                var nameOffset = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(symbol, 4));
+                if (nameOffset >= stringsSize) continue;
+                var nameStart = checked((int)(stringsOffset + nameOffset));
+                var nameEnd = Array.IndexOf(elf, (byte)0, nameStart, checked((int)(stringsSize - nameOffset)));
+                if (nameEnd < 0 || Encoding.ASCII.GetString(elf, nameStart, nameEnd - nameStart) != "nova_app_main") continue;
+                var value = BinaryPrimitives.ReadUInt32LittleEndian(elf.AsSpan(symbol + 4, 4));
+                var sectionIndex = BinaryPrimitives.ReadUInt16LittleEndian(elf.AsSpan(symbol + 14, 2));
+                return sectionIndex != 0 && (value & ~1u) == (entryPoint & ~1u);
+            }
+        }
+        return false;
     }
 
     private static void WriteFixed(BinaryWriter writer, string value, int length)
