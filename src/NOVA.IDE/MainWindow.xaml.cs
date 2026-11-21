@@ -51,6 +51,13 @@ public partial class MainWindow : Window
         StatusText.Text = "Project loaded. Select a target and build.";
     }
 
+    private static bool TryParseHexAddress(string input, out uint value)
+    {
+        var text = input.Trim();
+        if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) text = text[2..];
+        return uint.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out value) && value != 0;
+    }
+
     private async void Build_Click(object sender, RoutedEventArgs e)
     {
         if (_projectDirectory is null)
@@ -64,19 +71,45 @@ public partial class MainWindow : Window
             MessageBox.Show("CMake and Ninja must be installed and available on PATH.", "Toolchain missing", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        var sdk = Environment.GetEnvironmentVariable("PICO_SDK_PATH");
-        if (string.IsNullOrWhiteSpace(sdk) || !Directory.Exists(sdk))
-        {
-            MessageBox.Show("Set PICO_SDK_PATH to a valid local Raspberry Pi Pico SDK directory.", "Pico SDK missing", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
+
         var isPico2 = TargetBox.SelectedIndex == 1;
         var board = isPico2 ? "pico2" : "pico";
-        var platform = isPico2 ? "rp2350-arm-s" : "rp2040";
-        var buildDirectory = Path.Combine(_projectDirectory, "ide-build-" + board);
+        var appTarget = isPico2 ? "rp2350" : "rp2040";
+        var appToolchain = Path.Combine(_projectDirectory, "nova-app.toolchain.cmake");
+        var isNovaApp = File.Exists(appToolchain);
+        var buildDirectory = Path.Combine(_projectDirectory, isNovaApp ? "ide-build-app-" + appTarget : "ide-build-" + board);
+        string configureArguments;
+
+        if (isNovaApp)
+        {
+            if (FindOnPath("arm-none-eabi-gcc.exe") is null)
+            {
+                MessageBox.Show("Install ARM GNU Toolchain and ensure arm-none-eabi-gcc.exe is on PATH.", "ARM toolchain missing", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (!TryParseHexAddress(AppRamOriginBox.Text, out var ramOrigin) ||
+                !TryParseHexAddress(AppRamLengthBox.Text, out var ramLength))
+            {
+                MessageBox.Show("Enter a non-zero application RAM origin and length from the final NOVA firmware linker map. Never guess these values.", "Application memory map required", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            configureArguments = $"-S . -B \"{buildDirectory}\" -G Ninja -DCMAKE_TOOLCHAIN_FILE=\"{appToolchain}\" -DNOVA_APP_TARGET={appTarget} -DNOVA_APP_RAM_ORIGIN=0x{ramOrigin:X8} -DNOVA_APP_RAM_LENGTH=0x{ramLength:X8} -DCMAKE_BUILD_TYPE=Release";
+        }
+        else
+        {
+            var sdk = Environment.GetEnvironmentVariable("PICO_SDK_PATH");
+            if (string.IsNullOrWhiteSpace(sdk) || !Directory.Exists(sdk))
+            {
+                MessageBox.Show("Set PICO_SDK_PATH to a valid local Raspberry Pi Pico SDK directory.", "Pico SDK missing", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            var platform = isPico2 ? "rp2350-arm-s" : "rp2040";
+            configureArguments = $"-S . -B \"{buildDirectory}\" -G Ninja -DPICO_BOARD={board} -DPICO_PLATFORM={platform} -DPICO_SDK_PATH=\"{sdk}\" -DCMAKE_BUILD_TYPE=Release";
+        }
+
         OutputBox.Clear();
-        StatusText.Text = $"Configuring {board}...";
-        var configure = await RunProcess(cmake, $"-S . -B \"{buildDirectory}\" -G Ninja -DPICO_BOARD={board} -DPICO_PLATFORM={platform} -DPICO_SDK_PATH=\"{sdk}\" -DCMAKE_BUILD_TYPE=Release", _projectDirectory);
+        StatusText.Text = isNovaApp ? $"Configuring NOVA ABI application for {appTarget}..." : $"Configuring {board}...";
+        var configure = await RunProcess(cmake, configureArguments, _projectDirectory);
         if (configure != 0) { StatusText.Text = "CMake configuration failed."; return; }
         StatusText.Text = "Compiling...";
         var build = await RunProcess(cmake, $"--build \"{buildDirectory}\" --parallel", _projectDirectory);
