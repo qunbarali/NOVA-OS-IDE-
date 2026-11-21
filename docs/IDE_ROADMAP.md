@@ -12,6 +12,8 @@
 - Project templates and API browser
 - ELF inspection and memory map validation
 - Deterministic .nova package builder and verifier
+- WPF package creation and inspection UI
+- ABI v1 draft header and starter template
 - Strict 2 MiB package-size limit
 
 ## Alpha 2 — deployment
@@ -25,4 +27,4 @@
 - Resource/font/image conversion tools
 - Build profiles and reproducible toolchain versions
 
-Arbitrary ELF/BIN execution is not supported until NOVA has a defined application ABI, loader, lifecycle contract and memory-safety policy. UF2 is firmware transport, not an application executable.
+The ABI v1 header and package format exist, but arbitrary ELF/BIN execution remains disabled until the firmware loader, relocation policy, target-specific linker memory map, lifecycle supervisor and memory-safety policy are implemented and validated. UF2 is firmware transport, not an application executable.
