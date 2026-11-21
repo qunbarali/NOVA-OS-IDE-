@@ -1,0 +1,9 @@
+<Application x:Class="NOVA.IDE.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <SolidColorBrush x:Key="Navy" Color="#101827"/>
+    <SolidColorBrush x:Key="Panel" Color="#172235"/>
+    <SolidColorBrush x:Key="Accent" Color="#39B6A5"/>
+    <SolidColorBrush x:Key="TextMain" Color="#F3F6FA"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#9EADBF"/>
+  </Application.Resources>
+</Application>
