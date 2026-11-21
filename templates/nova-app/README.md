@@ -1,11 +1,16 @@
-# NOVA application starter (ABI v1 draft)
+# NOVA ABI v1 application template
 
-This folder contains the application entry contract used by the NOVA ABI design. It is not yet a runnable application project: the firmware-side ELF loader, linker memory map and lifecycle supervisor are still under development.
+This is a freestanding ARM ELF32 application starter. It exports nova_app_main, uses only the NOVA ABI service table, and links with ENTRY(nova_app_main) so the IDE package writer can verify the entry symbol.
 
-An application entry point must use:
+## Build prerequisites
+- arm-none-eabi-gcc
+- CMake and Ninja
+- The final NOVA firmware linker map for the selected board
 
-```c
-int nova_app_main(const nova_app_api_v1_t *api);
-```
+## Critical memory-map requirement
+Do not guess the application RAM window. The CMake project intentionally fails unless NOVA_APP_RAM_ORIGIN and NOVA_APP_RAM_LENGTH are supplied. These must refer to a dedicated region reserved by the matching NOVA firmware linker layout. The firmware currently does not load .nova packages, and the final reserved region is not yet established. Do not deploy this ELF for execution until the loader and memory map are complete.
 
-Check `api->abi_version` and `api->struct_size` before using the service table. Do not build this as a standalone UF2 firmware. See the NOVA-OS repository's APP_RUNTIME_DESIGN.md before targeting hardware.
+## Build
+The IDE recognizes nova-app.toolchain.cmake and configures the selected RP2040 or RP2350 target. Set the application RAM origin and length in the IDE fields after the firmware map is available. The output is nova_app.elf and nova_app.map.
+
+This template is freestanding and has no C library, startup code or dynamic relocation support. Applications must use the supplied ABI table for display, buttons, storage, yield and cooperative stop requests.
